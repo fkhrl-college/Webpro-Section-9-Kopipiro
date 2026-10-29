@@ -1,0 +1,3 @@
+RewriteEngine On
+
+RewriteRule ^(seed_admin)\.php$ - [R=404,L]
