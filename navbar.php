@@ -22,22 +22,24 @@ $shouldMergeCart = is_logged_in();
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="index.php">
+          <a class="nav-link" href="<?= htmlspecialchars($navbarIndex ?? 'index.php', ENT_QUOTES, "UTF-8") ?>">
             Home <span class="sr-only">(current)</span>
           </a>
         </li>
 
         <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="navbarDropdown"
-            role="button"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false">
-            Cari Kategori
-          </a>
+          <?php if (empty($hideNavbarFilter)): ?>
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false">
+              Cari Kategori
+            </a>
+          <?php endif; ?>
 
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="index.php?category=kopi">Kopi</a>
@@ -115,6 +117,8 @@ $shouldMergeCart = is_logged_in();
   </div>
 
   <style>
+    @import url("https://use.fontawesome.com/releases/v5.13.0/css/all.css");
+
     .navbar {
       position: fixed;
       top: 0;
