@@ -1,16 +1,17 @@
 <?php
-include 'auth.php';
-include 'config.php';
+include_once 'config.php';
+include_once "auth.php";
 
 if (is_logged_in()) {
   header("Location: index.php");
   exit;
 }
 
+$message = "";
 if (isset($_POST['form-login'])) {
   $username = $_POST['username'];
   $raw_passwd = $_POST['password'];
-  $stmt = mysqli_prepare($conn, "SELECT id, username, password, role FROM users WHERE username = ?");
+  $stmt = mysqli_prepare($conn, "SELECT id, username, password, role FROM users WHERE username = ? LIMIT 1");
   mysqli_stmt_bind_param($stmt, "s", $username);
   mysqli_stmt_execute($stmt);
   $user = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -22,13 +23,34 @@ if (isset($_POST['form-login'])) {
     header("Location: index.php");
     exit();
   } else {
-    $error = "Incorrect username or password";
+    $message = "<div class='alert alert-danger'>Incorrect username or password</div>";
   }
 }
 
 if (isset($_POST['form-register'])) {
   $username = $_POST['username'];
   $raw_passwd = $_POST['password'];
+  $query = mysqli_prepare($conn, "SELECT username FROM users WHERE username = ? LIMIT 1");
+  mysqli_stmt_bind_param($query, "s", $username);
+  mysqli_stmt_execute($query);
+  $user = mysqli_fetch_assoc(mysqli_stmt_get_result($query));
+  if ($user) {
+    $message = "<div class='alert alert-danger'>User with " . htmlspecialchars($username, ENT_QUOTES, "UTF-8") . " username already exists.</div>";
+  } else if ($username === "" || $raw_passwd === "") {
+    $message = "<div class='alert alert-danger'>All fields must be provided</div>";
+  } else if (strlen($raw_passwd) < 8) {
+    $message = "<div class='alert alert-danger'>Password must be at least 8 characters.</div>";
+  } else {
+    $password = password_hash($raw_passwd, PASSWORD_DEFAULT);
+    $stmt = mysqli_prepare($conn, "INSERT INTO users (username, password) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+    try {
+      mysqli_stmt_execute($stmt);
+      $message = "<div class='alert alert-success'>User added successfully.</div>";
+    } catch (mysqli_sql_exception $e) {
+      $message = "<div class='alert alert-danger'>Error when creating user: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, "UTF-8") . "</div>";
+    }
+  }
 }
 ?>
 
@@ -233,6 +255,7 @@ if (isset($_POST['form-register'])) {
 
 <body>
   <div class="login-page">
+    <?= $message ?>
     <div class="form">
 
       <div class="form-header">

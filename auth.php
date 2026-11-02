@@ -1,5 +1,9 @@
 <?php
-session_start();
+// prevent re-run session
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
 function is_logged_in(): bool
 {
   if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && isset($_SESSION['username'])) {
