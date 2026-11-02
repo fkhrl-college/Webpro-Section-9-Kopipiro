@@ -1,3 +1,7 @@
+<?php
+$shouldMergeCart = is_logged_in();
+?>
+
 <nav class="navbar navbar-dark navbar-expand-lg bg-dark py-3">
   <div class="container">
     <a class="navbar-brand text-warning font-weight-bold" href="index.php">
@@ -77,21 +81,31 @@
             <li class="nav-item">
               <a href="cart.php" class="btn btn-outline-light navbar-action cart-button">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">
-                  <?= isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0 ?>
-                </span>
+                <span class="cart-count">0</span>
               </a>
             </li>
           <?php endif; ?>
 
           <li class="nav-item">
-            <a class="btn btn-outline-danger navbar-action" href="logout.php">
-              Logout
-            </a>
+            <form action="logout.php" method="POST">
+              <input
+                type="hidden"
+                name="redirect"
+                value="<?= htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
+              <button type="submit" class="btn btn-outline-danger navbar-action">Logout</button>
+            </form>
           </li>
         <?php else: ?>
           <li class="nav-item">
-            <a class="btn btn-primary navbar-action" href="login.php">
+            <a href="cart.php" class="btn btn-outline-light navbar-action cart-button">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="cart-count">0</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="btn btn-primary navbar-action"
+              href="login.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
               Login
             </a>
           </li>
@@ -201,6 +215,32 @@
         padding: 7px 10px;
       }
     }
+
+    /* cart */
+    .cart-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 50rem;
+      background: #dc3545;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+    }
   </style>
   <script>
     const navbar = document.querySelector('.navbar');
@@ -208,5 +248,68 @@
     window.addEventListener('scroll', () => {
       navbar.classList.toggle('scrolled', window.scrollY > 0);
     });
+  </script>
+  <script>
+    window.cartLoggedIn = <?= $shouldMergeCart ? 'true' : 'false' ?>;
+  </script>
+  <script>
+    async function mergeGuestCart() {
+      if (!window.cartLoggedIn) {
+        return;
+      }
+
+      const guestCart = localStorage.getItem('kopipiro_cart');
+
+      if (!guestCart) {
+        return;
+      }
+
+      let items;
+
+      try {
+        items = JSON.parse(guestCart);
+      } catch {
+        console.error('Invalid guest cart JSON.');
+        return;
+      }
+
+      if (!Array.isArray(items) || items.length === 0) {
+        localStorage.removeItem('kopipiro_cart');
+        return;
+      }
+
+      try {
+        const response = await fetch('api/cart-merge.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            items
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          console.error('Cart merge failed:', data.message);
+          return;
+        }
+
+        localStorage.removeItem('kopipiro_cart');
+
+        document.querySelectorAll('.cart-count').forEach((badge) => {
+          badge.textContent = data.cart_count;
+        });
+
+        if (typeof loadCart === 'function') {
+          await loadCart();
+        }
+      } catch (error) {
+        console.error('Cart merge request failed:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', mergeGuestCart);
   </script>
 </nav>

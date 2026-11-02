@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS cart (
     CONSTRAINT fk_cart_product
         FOREIGN KEY (product_id)
         REFERENCES products(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT chk_cart_quantity
-        CHECK (quantity > 0)
+        ON DELETE CASCADE
 );
+
+ALTER TABLE cart ADD CONSTRAINT chk_cart_quantity
+    CHECK (quantity > 0);

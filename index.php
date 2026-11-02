@@ -305,7 +305,13 @@ if (is_logged_in() && is_cashier()) {
 
               <div class="d-grid gap-2 my-4">
 
-                <a href="#" class="btn btn-warning bold-btn">Add to cart</a>
+                <button
+                  type="button"
+                  class="btn btn-warning bold-btn add-to-cart"
+                  data-product-id="<?= (int) $row['id'] ?>">
+                  <i class="fas fa-cart-plus mr-1"></i>
+                  Add to Cart
+                </button>
 
               </div>
               <!-- <div class="clearfix mb-1">
@@ -328,6 +334,128 @@ if (is_logged_in() && is_cashier()) {
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <!-- bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script>
+    window.cartLoggedIn = <?= is_logged_in() ? 'true' : 'false' ?>;
+  </script>
+  <script>
+    function getGuestCart() {
+      try {
+        const cart = JSON.parse(localStorage.getItem('kopipiro_cart') || '[]');
+        return Array.isArray(cart) ? cart : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveGuestCart(cart) {
+      localStorage.setItem('kopipiro_cart', JSON.stringify(cart));
+    }
+
+    function updateCartBadge(count) {
+      document.querySelectorAll('.cart-count').forEach((badge) => {
+        badge.textContent = count;
+      });
+    }
+
+    async function addToCart(productId) {
+      if (window.cartLoggedIn) {
+        const response = await fetch('api/cart-add.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            product_id: productId
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Gagal menambahkan produk');
+        }
+
+        updateCartBadge(data.cart_count);
+      } else {
+        const cart = getGuestCart();
+        const item = cart.find(
+          (item) => Number(item.product_id) === productId
+        );
+
+        if (item) {
+          item.quantity = Math.min(Number(item.quantity) + 1, 99);
+        } else {
+          cart.push({
+            product_id: productId,
+            quantity: 1
+          });
+        }
+
+        saveGuestCart(cart);
+
+        const count = cart.reduce(
+          (sum, item) => sum + Number(item.quantity || 0),
+          0
+        );
+
+        updateCartBadge(count);
+      }
+    }
+
+    document.querySelectorAll('.add-to-cart').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const productId = Number(button.dataset.productId);
+
+        if (!Number.isInteger(productId) || productId < 1) {
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          await addToCart(productId);
+
+          const originalText = button.innerHTML;
+          button.innerHTML = '<i class="fas fa-check mr-1"></i> Ditambahkan';
+
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 1000);
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+
+    async function loadCartBadge() {
+      if (window.cartLoggedIn) {
+        // Badge akun login akan diisi dari data MySQL.
+        try {
+          const response = await fetch('api/cart-data.php', {
+            method: 'POST'
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            updateCartBadge(data.cart_count);
+          }
+        } catch (error) {
+          console.error('Gagal memuat jumlah keranjang:', error);
+        }
+      } else {
+        const cart = getGuestCart();
+
+        updateCartBadge(
+          cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+        );
+      }
+    }
+
+    loadCartBadge();
+  </script>
 </body>
 
 </html>

@@ -1,9 +1,11 @@
 <?php
 include_once 'config.php';
-include_once "auth.php";
+include_once 'auth.php';
+include_once 'utils.php';
 
+$redirect = get_safe_redirect($_POST['redirect'] ?? 'index.php');
 if (is_logged_in()) {
-  header("Location: index.php");
+  header("Location: " . $redirect);
   exit;
 }
 
@@ -16,11 +18,10 @@ if (isset($_POST['form-login'])) {
   mysqli_stmt_execute($stmt);
   $user = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
   if ($user && password_verify($raw_passwd, $user['password'])) {
-    session_regenerate_id(true);
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['role'] = $user['role'];
-    header("Location: index.php");
+    header("Location: " . $redirect);
     exit();
   } else {
     $message = "<div class='alert alert-danger'>Incorrect username or password</div>";
@@ -285,6 +286,14 @@ if (isset($_POST['form-register'])) {
       </form>
 
       <form class="login-form" name="form-login" method="POST">
+        <!-- untuk redirect ke halaman sebelumnya -->
+        <input
+          type="hidden"
+          name="redirect"
+          value="<?= e(get_safe_redirect($_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php')) ?>">
+
+        <!-- merge data cart guest -->
+        <input type="hidden" name="guest_cart" id="guest-cart-input">
         <input
           type="text"
           name="username"

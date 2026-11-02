@@ -2,6 +2,9 @@
 session_start();
 session_unset();
 session_destroy();
+include_once 'utils.php';
 
-header("Location: index.php");
+$redirect = get_safe_redirect($_POST['redirect'] ?? 'index.php');
+
+header("Location: " . $redirect);
 exit();
