@@ -484,6 +484,9 @@ mysqli_free_result($result);
   <?php
   $hideNavbarFilter = true;
   $navbarIndex = "../index.php";
+  $navbarLogout = "../logout.php";
+  $navbarOrders = "orders.php";
+  $navbarProducts = "#";
   include '../navbar.php';
   ?>
 

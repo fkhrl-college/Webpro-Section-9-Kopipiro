@@ -4,7 +4,7 @@ $shouldMergeCart = is_logged_in();
 
 <nav class="navbar navbar-dark navbar-expand-lg bg-dark py-3">
   <div class="container">
-    <a class="navbar-brand text-warning font-weight-bold" href="index.php">
+    <a class="navbar-brand text-warning font-weight-bold" href="<?= htmlspecialchars($navbarIndex ?? 'index.php', ENT_QUOTES, "UTF-8") ?>">
       <span class="text-warning">☕</span> Kopipiro
     </a>
 
@@ -67,14 +67,18 @@ $shouldMergeCart = is_logged_in();
 
           <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="nav-item">
-              <a class="btn btn-warning navbar-action" href="admin/products.php">
+              <a class="btn btn-warning navbar-action" href="<?= htmlspecialchars($navbarProducts ?? 'admin/products.php', ENT_QUOTES, "UTF-8") ?>">
                 Products
               </a>
             </li>
-
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="btn btn-warning navbar-action" href="admin/users.php">
                 Users
+              </a>
+            </li> -->
+            <li class="nav-item">
+              <a class="btn btn-warning navbar-action" href="<?= htmlspecialchars($navbarOrders ?? 'admin/orders.php', ENT_QUOTES, "UTF-8") ?>">
+                Orders
               </a>
             </li>
           <?php endif; ?>
@@ -89,7 +93,7 @@ $shouldMergeCart = is_logged_in();
           <?php endif; ?>
 
           <li class="nav-item">
-            <form action="logout.php" method="POST">
+            <form action="<?= htmlspecialchars($navbarLogout ?? 'logout.php', ENT_QUOTES, "UTF-8") ?>" method="POST">
               <input
                 type="hidden"
                 name="redirect"

@@ -507,16 +507,23 @@ include 'config.php';
       checkoutButton.classList.toggle('disabled', isEmpty);
     }
 
-    // logika checkout
-    async function clearCart() {
+    // hapus cart saat co
+    async function clearCart(fromCheckout = false) {
       const checkoutButton = document.getElementById('checkout-button');
       const cartItems = document.getElementById('cart-items');
 
-      if (checkoutButton.disabled) {
+      // Jika dipanggil secara manual, jangan lanjut ketika tombol disabled.
+      // Saat checkout, tombol memang sudah disabled oleh handler checkout.
+      if (!fromCheckout && checkoutButton.disabled) {
         return;
       }
 
-      if (!confirm('Apakah kamu yakin ingin mengosongkan keranjang?')) {
+      // Konfirmasi hanya dilakukan oleh handler checkout atau
+      // ketika fungsi dipanggil secara manual.
+      if (
+        !fromCheckout &&
+        !confirm('Apakah kamu yakin ingin mengosongkan keranjang?')
+      ) {
         return;
       }
 
@@ -536,7 +543,9 @@ include 'config.php';
           const data = await response.json();
 
           if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Gagal mengambil data keranjang.');
+            throw new Error(
+              data.message || 'Gagal mengambil data keranjang.'
+            );
           }
 
           // Hapus setiap barang satu per satu.
@@ -570,11 +579,18 @@ include 'config.php';
             await loadCart();
 
             throw new Error(
-              `Gagal menghapus ${failedItems.length} barang: ${failedItems.join(', ')}.`
+              `
+    Gagal menghapus $ {
+      failedItems.length
+    }
+    barang: $ {
+      failedItems.join(', ')
+    }.
+    `
             );
           }
         } else {
-          // Hapus seluruh keranjang guest.
+          // Hapus seluruh keranjang guest dari localStorage.
           localStorage.removeItem('kopipiro_cart');
         }
 
@@ -586,30 +602,97 @@ include 'config.php';
 
         updateCartBadge(0);
 
-        // Tampilkan notifikasi, bukan tampilan keranjang kosong.
-        cartItems.innerHTML = `
-      <div class="alert alert-success" role="alert">
-        <i class="fas fa-check-circle mr-2"></i>
-        Keranjang berhasil dikosongkan.
-      </div>
+        // Tampilkan notifikasi sesuai konteks.
+        cartItems.innerHTML = fromCheckout ?
+          `<div class="alert alert-success"
+    role="alert" >
+      <i class="bi bi-check-circle mr-2"></i>
+    Checkout berhasil dan keranjang telah dikosongkan. </div>
+    ` : `<div class="alert alert-success" role="alert">
+      <i class="bi bi-check-circle mr-2"></i> Keranjang berhasil dikosongkan. </div>
     `;
       } catch (error) {
         await loadCart();
 
-        cartItems.insertAdjacentHTML('afterbegin', `
-      <div class="alert alert-danger" role="alert">
-        ${escapeHtml(error.message || 'Gagal mengosongkan keranjang.')}
-      </div>
+        cartItems.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger" role="alert">${escapeHtml(error.message || 'Gagal mengosongkan keranjang.')}</div>
     `);
+
+        // Lempar ulang agar handler checkout tahu pengosongan gagal.
+        throw error;
       } finally {
         const cartCount = Number(
           document.getElementById('cart-item-count').textContent
           .replace(' barang', '')
         );
+
         updateCheckoutButton(cartCount);
       }
     }
-    document.getElementById('checkout-button').addEventListener('click', clearCart);
+
+    // tambah order saat co
+    async function addOrder(total_price) {
+      const response = await fetch('api/order-add.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          total_price: total_price,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Gagal membuat pesanan.');
+      }
+
+      return data.data;
+    }
+
+    // Logika checkout.
+    document.getElementById('checkout-button').addEventListener('click', async function() {
+      const checkoutButton = this;
+      if (checkoutButton.disabled) {
+        return;
+      }
+      const totalPriceText = document.getElementById('cart-total').textContent;
+      const totalPrice = Number(totalPriceText.replace(/\D/g, ''));
+
+      if (!Number.isSafeInteger(totalPrice) || totalPrice <= 0) {
+        alert('Keranjang kosong atau total pesanan tidak valid.');
+        return;
+      }
+
+      if (!confirm('Apakah kamu yakin ingin melakukan checkout?')) {
+        return;
+      }
+
+      checkoutButton.disabled = true;
+      checkoutButton.classList.add('disabled');
+
+      try {
+        const order = await addOrder(totalPrice);
+        await clearCart(true);
+        alert(
+          `Checkout berhasil!\n` +
+          `Nomor pesanan: ${order.order_id}\n` +
+          `Total: Rp${order.total_price.toLocaleString('id-ID')}`
+        );
+
+      } catch (error) {
+        alert(error.message || 'Terjadi kesalahan saat checkout.');
+      } finally {
+        if (checkoutButton.disabled) {
+          const cartCount = Number(
+            document.getElementById('cart-item-count').textContent
+            .replace(' barang', '')
+          );
+
+          updateCheckoutButton(cartCount);
+        }
+      }
+    });
 
     loadCart();
   </script>

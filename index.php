@@ -210,6 +210,11 @@ if (is_logged_in() && is_cashier()) {
       /* box-shadow: -1px 6px 13px rgba(255, 150, 43, 0.35); */
     }
 
+    .add-to-cart.disabled:hover {
+      color: var(--btn-warning);
+      cursor: not-allowed;
+    }
+
     .btn-check:focus+.btn-warning,
     .btn-warning:focus {
       background: var(--btnbghover);
@@ -305,13 +310,26 @@ if (is_logged_in() && is_cashier()) {
 
               <div class="d-grid gap-2 my-4">
 
-                <button
-                  type="button"
-                  class="btn btn-warning bold-btn add-to-cart"
-                  data-product-id="<?= (int) $row['id'] ?>">
-                  <i class="fas fa-cart-plus mr-1"></i>
-                  Add to Cart
-                </button>
+                <!-- admin gk bisa beli -->
+                <?php if (is_logged_in()): ?>
+                  <?php if (is_admin()): ?>
+                    <button
+                      type="button"
+                      class="btn btn-warning bold-btn add-to-cart disabled"
+                      data-product-id="<?= (int) $row['id'] ?>" disabled>
+                      <i class="fas fa-cart-plus mr-1"></i>
+                      Add to Cart
+                    </button>
+                  <?php endif ?>
+                <?php else: ?>
+                  <button
+                    type="button"
+                    class="btn btn-warning bold-btn add-to-cart"
+                    data-product-id="<?= (int) $row['id'] ?>">
+                    <i class="fas fa-cart-plus mr-1"></i>
+                    Add to Cart
+                  </button>
+                <?php endif ?>
 
               </div>
               <!-- <div class="clearfix mb-1">
