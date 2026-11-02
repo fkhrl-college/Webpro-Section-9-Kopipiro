@@ -16,9 +16,27 @@ function is_admin(): bool
   return $_SESSION['role'] === 'admin';
 }
 
+function is_customer(): bool
+{
+  return $_SESSION['role'] === 'customer';
+}
+
+function is_cashier(): bool
+{
+  return $_SESSION['role'] === 'cashier';
+}
+
 function require_admin()
 {
   if (!is_admin()) {
+    http_response_code(403);
+    die("403 - Access denied. This page is for admins only.");
+  }
+}
+
+function require_cashier()
+{
+  if (!is_cashier()) {
     http_response_code(403);
     die("403 - Access denied. This page is for admins only.");
   }

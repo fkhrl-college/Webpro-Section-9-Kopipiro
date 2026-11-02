@@ -73,6 +73,17 @@
             </li>
           <?php endif; ?>
 
+          <?php if (is_customer()): ?>
+            <li class="nav-item">
+              <a href="cart.php" class="btn btn-outline-light navbar-action cart-button">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">
+                  <?= isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0 ?>
+                </span>
+              </a>
+            </li>
+          <?php endif; ?>
+
           <li class="nav-item">
             <a class="btn btn-outline-danger navbar-action" href="logout.php">
               Logout
@@ -90,6 +101,18 @@
   </div>
 
   <style>
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1030;
+    }
+
+    .navbar.scrolled {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    }
+
     .navbar>.container {
       max-width: 1300px;
     }
@@ -179,4 +202,11 @@
       }
     }
   </style>
+  <script>
+    const navbar = document.querySelector('.navbar');
+
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 0);
+    });
+  </script>
 </nav>

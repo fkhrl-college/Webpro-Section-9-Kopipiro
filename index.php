@@ -18,6 +18,11 @@ if (isset($_GET['category'])) {
   $result = mysqli_query($conn, $query);
 }
 
+if (is_logged_in() && is_cashier()) {
+  header("Location: cashier.php");
+  exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -265,7 +270,7 @@ if (isset($_GET['category'])) {
 <body>
   <?php include 'navbar.php'; ?>
 
-  <div class="container-fluid bg-trasparent my-4 p-3" style="position: relative">
+  <div class="container-fluid bg-trasparent my-4 p-3 mt-4" style="position: relative; margin-top: 10vh !important;">
     <div class="row row-cols-1 row-cols-xs-2 row-cols-sm-2 row-cols-lg-4 g-3">
       <?php while ($row = mysqli_fetch_assoc($result)): ?>
         <div class="col hp m-4">
@@ -319,11 +324,9 @@ if (isset($_GET['category'])) {
     </div>
   </div>
 
-  <div class="small text-muted my-4">Images by <a target="_blank" href="https://www.amazon.com/">Amazon</a></div>
-
-  <!-- bootstrap -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <!-- bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 
