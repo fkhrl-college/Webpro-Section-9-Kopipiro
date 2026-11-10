@@ -1,3 +1,4 @@
-RewriteEngine On
-
-RewriteRule ^(seed_admin|seed_cashier)\.php$ - [R=404,L]
+<!-- block /tools route -->
+<IfModule mod_rewrite.c>
+  RewriteEngine On RewriteRule ^tools(/|$) - [F,L,NC]
+</IfModule>
