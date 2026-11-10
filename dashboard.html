@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kopipiro Dashboard</title>
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+  <body>
+    <h1>Kopipiro Dashboard</h1>
+    <p><span id="who"></span> <a href="shop.html">Back to shop</a></p>
+    <form id="loginForm" class="hidden">
+      d="email" type="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Password" />
+      <button>Log in</button> <span id="loginMsg"></span>
+    </form>
+    <section id="ordersBox" class="hidden">
+      <h2 id="ordersTitle"></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Cashier</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+    <section id="ownerBox" class="hidden">
+      <h2>Sales</h2>
+      <p><a href="api/export.php">Download all orders (Excel)</a></p>
+      <div class="charts">
+        <div><canvas id="c1"></canvas></div>
+        <div><canvas id="c2"></canvas></div>
+      </div>
+      <h2>Add product</h2>
+      <form id="prodForm">
+        <input name="name" placeholder="Product name" required />
+        <select name="category_id" id="catSel"></select>
+        <input
+          name="price"
+          type="number"
+          min="1"
+          placeholder="Price (Rp)"
+          required
+        />
+        <input name="description" placeholder="Description" />
+        <input
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        />
+        <button>Add</button> <span id="pMsg"></span>
+      </form>
+    </section>
+    <script src="./js/dashboard.js"></script>
+  </body>
+</html>
