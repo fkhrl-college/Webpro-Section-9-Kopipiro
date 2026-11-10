@@ -1,4 +1,7 @@
-<!-- block /tools route -->
+<!-- # Block internal tools directory -->
 <IfModule mod_rewrite.c>
-  RewriteEngine On RewriteRule ^tools(/|$) - [F,L,NC]
+    RewriteEngine On
+
+    RewriteRule ^tools(/|$) - [F,L,NC]
+
 </IfModule>

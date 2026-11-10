@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/shop.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Kopipiro</h1>
+      <div>
+        <a href="dashboard.html">Staff dashboard</a>
+        <span id="who"></span> <button id="btnAuth"></button>
+      </div>
+    </header>
+    <p id="promo"></p>
+    <main>
+      <section>
+        <div id="cats"></div>
+        <div id="grid"></div>
+      </section>
+      <aside>
+        <h2>Checkout</h2>
+        <ul id="cart"></ul>
+        <p>Total: <b id="total">Rp 0</b></p>
+        <input id="guestName" placeholder="Your name (guests)" />
+        <button id="btnCheckout">Place order</button>
+        <div id="result"></div>
+      </aside>
+    </main>
+    <dialog id="dlg">
+      <h3>Log in / Register</h3>
+      <p><input id="aName" placeholder="Name (register only)" /></p>
+      <p><input id="aEmail" type="email" placeholder="Email" /></p>
+      <p><input id="aPass" type="password" placeholder="Password" /></p>
+      <button id="btnLogin">Log in</button>
+      <button id="btnReg">Register</button>
+      <button id="btnCancel">Cancel</button>
+      <p id="aMsg"></p>
+    </dialog>
+    <script src="./js/shop.js"></script>
+  </body>
+</html>
