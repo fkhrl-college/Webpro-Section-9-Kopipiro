@@ -1,3 +1,5 @@
+const BASE_API_URL = "http://localhost:8079/week-9/api/v1";
+
 const $ = (s) => document.querySelector(s);
 
 const esc = (s) =>
@@ -30,7 +32,7 @@ async function api(url, opts = {}) {
 }
 
 async function init() {
-  me = await api("api/auth.php?action=me");
+  me = await api(`${BASE_API_URL}/auth.php?action=me`);
   $("#who").textContent = me.name ? me.name + " (" + me.role + ")" : "Guest";
   $("#btnAuth").textContent = me.name ? "Log out" : "Log in";
   $("#promo").textContent =
@@ -42,7 +44,7 @@ async function init() {
 
 async function loadProducts() {
   const q = category ? "?category=" + encodeURIComponent(category) : "";
-  const data = await api("api/products.php" + q);
+  const data = await api(`${BASE_API_URL}/products.php` + q);
   data.products.forEach((p) => (known[p.id] = p)); // remember prices for the cart
   $("#cats").innerHTML = ["", ...data.categories.map((c) => c.name)]
     .map(
@@ -104,7 +106,7 @@ document.addEventListener("click", async (e) => {
   }
   if (e.target.id === "btnPay") {
     try {
-      const r = await api("api/pay.php", {
+      const r = await api(`${BASE_API_URL}/pay.php`, {
         method: "POST",
         body: JSON.stringify({ order_code: d.code }),
       });
@@ -120,7 +122,7 @@ $("#btnCheckout").onclick = async () => {
     qty,
   }));
   try {
-    const o = await api("api/orders.php", {
+    const o = await api(`${BASE_API_URL}/orders.php`, {
       method: "POST",
       body: JSON.stringify({
         items,
@@ -144,7 +146,7 @@ $("#btnCheckout").onclick = async () => {
 
 async function auth(action) {
   try {
-    const r = await api("api/auth.php?action=" + action, {
+    const r = await api(`${BASE_API_URL}/auth.php?action=` + action, {
       method: "POST",
       body: JSON.stringify({
         name: $("#aName").value,
@@ -168,7 +170,7 @@ $("#btnCancel").onclick = () => $("#dlg").close();
 
 $("#btnAuth").onclick = async () => {
   if (me.name) {
-    await api("api/auth.php?action=logout", { method: "POST" });
+    await api(`${BASE_API_URL}/auth.php?action=logout`, { method: "POST" });
     cart = {};
     known = {};
     init();
